@@ -366,6 +366,8 @@ function buildAuthHeaders(config) {
     // an OpenAI-compat proxy, Bearer still works. We use ANTHROPIC_API_KEY
     // first, then fall back to the generic key.
     apiKey = process.env.ANTHROPIC_API_KEY || modelConfig.apiKey;
+  } else if (baseUrl.includes('venice.ai')) {
+    apiKey = process.env.VENICE_API_KEY || process.env.OPENAI_API_KEY || modelConfig.apiKey;
   } else {
     // Local server or unknown cloud — fall back to any available key.
     // SMALLCODE_API_KEY is the explicit "my endpoint needs this key" option.
