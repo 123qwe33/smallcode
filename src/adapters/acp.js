@@ -7,26 +7,13 @@ class ACPAdapter {
     this._sessions = new Map();
     this._chunkCb = null;
     this._acpWrite = null;
+    process.__acpAdapter = this;  // register for chunk forwarding
   }
 
   start() {
-    this._acpWrite = process.stdout.write.bind(process.stdout);
-
-    // Override process.stdout.write
-    process.stdout.write = (chunk, encoding, callback) => {
-      // Write to stderr (debug copy)
-      process.stderr.write(chunk, encoding);
-
-      if (this._chunkCb) {
-        const text = chunk.toString();
-        const stripped = text.replace(/\x1b\[[0-9;]*[a-zA-Z]|\r/g, '');
-        if (stripped.trim()) {
-          this._chunkCb(stripped);
-        }
-      }
-      if (typeof callback === 'function') callback();
-      return true;
-    };
+    // stdout was already redirected to stderr at process startup.
+    // Grab the real write handle that was stored then.
+    this._acpWrite = process.__acpWrite;
 
     const rl = readline.createInterface({
       input: process.stdin,

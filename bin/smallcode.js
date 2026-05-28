@@ -9,6 +9,21 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+// ACP mode: capture real stdout before anything writes to it
+if (process.argv.includes('--acp')) {
+  process.__acpWrite = process.stdout.write.bind(process.stdout);
+  process.__acpAdapter = null; // will be set by ACPAdapter constructor
+  process.stdout.write = function(chunk, enc, cb) {
+    process.stderr.write(chunk);
+    if (process.__acpAdapter?._chunkCb) {
+      const text = chunk.toString().replace(/\x1b\[[0-9;]*[a-zA-Z]|\r/g, '');
+      if (text.trim()) process.__acpAdapter._chunkCb(text);
+    }
+    if (typeof cb === 'function') cb();
+    return true;
+  };
+}
+
 // Load .env file (checks multiple locations, first found wins)
 (function loadDotenv() {
   const os = require('os');
