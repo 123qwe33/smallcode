@@ -64,6 +64,17 @@ class ACPAdapter {
             }
           });
           break;
+        case 'authenticate':
+          this._sendResult(id, {});
+          break;
+        case 'session/new':
+          const sessionId = require('crypto').randomUUID();
+          this._sessions.set(sessionId, { cwd: params?.cwd || process.cwd() });
+          this._sendResult(id, { sessionId });
+          break;
+        case 'session/cancel':
+          // Notification, no response
+          break;
         default:
           if (id !== undefined) {
             this._sendError(id, -32601, `Method not found: ${method}`);
