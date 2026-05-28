@@ -80,3 +80,4 @@ marrow.toml
 !marrow/features_1_6.marrow
 !marrow/quality_monitor.marrow
 !marrow/read_guard.marrow
+/.agent-shell/

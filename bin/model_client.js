@@ -39,7 +39,7 @@ async function chatCompletion(ctx) {
       model: target.model,
       messages: [systemMsg, ...processedMessages],
       temperature: 0.1,
-      max_tokens: 4096,
+      max_tokens: 2048,
     };
     // Only include tools when there are tools to send — some endpoints (OpenWebUI)
     // error on an empty tools array rather than treating it as "no tools".

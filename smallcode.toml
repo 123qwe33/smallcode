@@ -1,10 +1,16 @@
 # SmallCode default configuration
 
 [model]
-provider = "openai"
+provider = "venice"
+# --- Venice.ai models to try ---
+# name = "google-gemma-4-26b-a4b-it"
+# name = "google-gemma-3-27b-it"
+# name = "qwen3-235b-a22b-instruct-2507"
+# name = "mistral-small-3-2-24b-instruct"
+# name = "deepseek-v3.2"
 # name = "huihui-gemma-4-e4b-it-abliterated"
-name = "gpt-oss:20b"
-baseUrl = "http://localhost:11434/v1"
+name = "llama-3.3-70b"
+baseUrl = "https://api.venice.ai/api/v1"
 # context_length = 32768
 # tool_format = "hermes"
 # timeout = 300   # seconds to wait for model response (default: 300 / 5 min)
@@ -49,7 +55,7 @@ auto_approve = false
 [escalation]
 # Escalate to a stronger model when local model hard fails after decompose
 # Set provider + api_key, OR set env vars: ANTHROPIC_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY
-# provider = "anthropic"   # anthropic, openai, deepseek
+# provider = "venice"   # anthropic, openai, deepseek
 # api_key = ""             # or use env var
 # model = ""               # blank = use provider default
 max_per_session = 5        # max escalations per session

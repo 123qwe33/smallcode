@@ -72,6 +72,35 @@ class ACPAdapter {
           this._sessions.set(sessionId, { cwd: params?.cwd || process.cwd() });
           this._sendResult(id, { sessionId });
           break;
+        case 'session/prompt': {
+          const { sessionId, prompt } = params;
+          const session = this._sessions.get(sessionId);
+          if (!session) {
+            this._sendError(id, -32602, `Unknown session: ${sessionId}`);
+            return;
+          }
+          const text = this._extractText(prompt);
+          const prevCwd = process.cwd();
+          try {
+            process.chdir(session.cwd);
+          } catch {}
+          this._chunkCb = (delta) => {
+            this._sendNotification('session/update', {
+              update: {
+                sessionUpdate: 'agent_message_chunk',
+                content: { text: delta },
+              },
+            });
+          };
+          try {
+            await this._agentLoop(text, this._config);
+          } finally {
+            this._chunkCb = null;
+            try { process.chdir(prevCwd); } catch {}
+          }
+          this._sendResult(id, { sessionId });
+          break;
+        }
         case 'session/cancel':
           // Notification, no response
           break;
@@ -86,6 +115,22 @@ class ACPAdapter {
         this._sendError(id, -32603, e.message);
       }
     }
+  }
+
+  _extractText(prompt) {
+    if (!prompt) return '';
+    if (typeof prompt === 'string') return prompt;
+    if (Array.isArray(prompt)) {
+      return prompt.map(block => {
+        if (typeof block === 'string') return block;
+        if (block.text) return block.text;
+        if (block.content?.text) return block.content.text;
+        return '';
+      }).join('');
+    }
+    if (prompt.text) return prompt.text;
+    if (prompt.content?.text) return prompt.content.text;
+    return String(prompt);
   }
 
   _sendResult(id, result) {
